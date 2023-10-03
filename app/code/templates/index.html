@@ -1,0 +1,39 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Home page</title>
+    <style>
+        .vertical-offset-header {
+            transform: translateY(300%);
+        }
+        .vertical-offset-button {
+            transform: translateY(500%);
+        }
+    </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+</head>
+<body>
+    {% include 'navbar.html' %}
+    <div>
+        <div class="row vertical-offset-header">
+            <div class="d-flex align-items-center justify-content-center">
+                <h1>Welcome to Car Price Prediction</h1>
+            </div>
+        </div>
+        <div class="row vertical-offset-button">
+            <div class="col d-flex align-items-center justify-content-center">
+                <a href="/predict_old" class="btn btn-dark">Predict using old model!</a>
+            </div>
+        </div>
+        <div class="row vertical-offset-button">
+            <div class="col d-flex align-items-center justify-content-center">
+                <a href="/predict_new" class="btn btn-success">Predict using new model!</a>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+</body>
+</html>

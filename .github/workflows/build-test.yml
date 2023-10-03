@@ -1,0 +1,85 @@
+# Name of this workflow
+name: Build-Test
+# Name of this run
+run-name: ${{ github.actor }} Building and Testing
+# When this action will be trigger
+# I want to do this when we push new change with tag.
+# This tag will be used next when we build and push the image to dockerhub
+on:
+  push:
+    tags:
+      - 'v*'
+# There can be multiple jobs
+jobs:
+  # Job name
+  build-test:
+    # Target machine that this job will run on.
+    # ubuntu-latest or ubuntu-22.04 is the same image (as is August 2023)
+    runs-on: ubuntu-latest
+    # Tasks, specify in list.
+    steps:
+      # https://github.com/actions/checkout: will clone Git into the image
+      - uses: actions/checkout@v4
+      # Execute terminal command.
+      - name: Make envfile
+        uses: SpicyPizza/create-envfile@v2.0
+        with:
+          envkey_MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
+          envkey_APP_MODEL_NAME: ${{ secrets.APP_MODEL_NAME }}
+          file_name: .env
+          fail_on_empty: true
+          sort_keys: true
+      - name: Build the Docker image
+        run: docker compose build
+      - name: Compose up
+        run: docker compose up -d
+      # Execute pytest
+      - name: Testing
+        run: docker compose exec -it dash pytest --ignore=test_model_staging.py -v
+      # If the testing pass, upload the image
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      # - name: Set up Docker Buildx
+      #   uses: docker/setup-buildx-action@v3
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          # Your image name
+          images: minnbanya/ml2023-a3
+          tags: type=semver,pattern={{raw}}
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: .Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+  deploy:
+    environment: Production
+    needs: build-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install sshpass and expect
+        run: |
+          sudo apt-get install sshpass -y
+          sudo apt-get install expect -y
+
+      - name: SSH Remote Commands
+        run: |
+          # Use expect to input passphrase for proxy jump key
+          expect -c "
+            spawn sshpass -p '${{ secrets.CSIM_PASSWORD }}' ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+            '${{ secrets.USERNAME }}'@'${{ vars.HOST }}' \
+            -o ProxyJump='${{ secrets.USERNAME }}'@'${{ vars.PROXY_HOST }}' -i '${{ secrets.PROXY_JUMP_KEY }}' \
+            'tag=\${{ github.ref_name }} docker compose -f st121413/docker-compose.yaml down; \
+            tag=\${{ github.ref_name }} docker compose -f st121413/docker-compose.yaml up -d'
+            expect {
+              \"*?assword:*\" { send \"\${{ secrets.SSH_PASSWORD }}\\r\"; }
+            }
+            interact
+          "
+  

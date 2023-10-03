@@ -1,0 +1,76 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- Importing bootstrap -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Input Data</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+</head>
+<body>
+    {% include 'navbar.html' %}
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <h1 class="text-center">Input Data (Old Model)</h1>
+                <!-- User Instructions -->
+                <p>
+                    Please input the brand name, the engine power and mileage (fuel efficiency) of your car in the fields below to see the predicted selling price.
+                    If you don't know one or more data of the fields, do not worry. Just leave it blank and the website will do the prediction using the most probable values.
+                </p>
+                <!-- User data input -->
+                <form id="data-form" action="/process-data_old" method="post">
+                    <div class="form-group">
+                        <label for="name">Name:</label>
+                        <input type="text" id="name" name="name" class="form-control">
+                    </div>
+                
+                    <div class="form-group">
+                        <label for="engine">Engine:</label>
+                        <input type="text" id="engine" name="engine" class="form-control">
+                    </div>
+                
+                    <div class="form-group">
+                        <label for="mileage">Mileage:</label>
+                        <input type="text" id="mileage" name="mileage" class="form-control">
+                    </div>
+                
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+                
+            </div>
+        </div>
+        <!-- Display predicted result -->
+        <div class="row justify-content-center mt-4">
+            <div class="col-md-6">
+                <div id="processed-data" class="text-center"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+    <!-- Listens to submit button, processes the input data and shows the result without reloading or redirecting the user -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('data-form');
+        const processedDataDiv = document.getElementById('processed-data');
+    
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent form submission
+            const formData = new FormData(form);
+    
+            fetch('/process-data_old', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(result => {
+                processedDataDiv.innerHTML = `<p style="font-size: 18px; font-weight: bold;">Your car can be sold for: ${result}!</p>`;
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
+    </script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+# Name of this workflow
+name: Test Model on Staging
+# Name of this run
+run-name: ${{ github.actor }} Test model on staging
+
+# there is no trigger. I will do it manaully in GitHub.
+on: workflow_dispatch
+
+jobs:
+  staging-test:
+    runs-on: ubuntu-latest
+    steps:
+      # This is the same as build-test
+      - uses: actions/checkout@v4
+      # We won't build
+      # - name: Build the Docker image
+      #   run: docker compose build
+      # This will only load the latest image
+      - name: Make envfile
+        uses: SpicyPizza/create-envfile@v2.0
+        with:
+          envkey_MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
+          envkey_APP_MODEL_NAME: ${{ secrets.APP_MODEL_NAME }}
+          file_name: .env
+          fail_on_empty: true
+          sort_keys: true
+      - name: Compose up
+        run: docker compose up -d
+      # This is new
+      # only run test on test_model_staging.py
+      - name: Testing
+        run: docker compose exec -it dash pytest test_model_staging.py -v
+      - name: Transition to production
+        run: docker compose exec -it dash python transition.py

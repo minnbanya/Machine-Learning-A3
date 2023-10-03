@@ -1,0 +1,8 @@
+.vscode-server/*
+__pycache__
+.pytest_cache/*
+.mlruns/*
+
+!.keeps
+/.env
+/code/models
