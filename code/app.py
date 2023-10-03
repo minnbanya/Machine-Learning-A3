@@ -165,12 +165,6 @@ def process_data_class():
         year = request.form.get('year', year_class)
         max = request.form.get('max', max_class)
 
-        # Convert fuel and year and max to float only if they are not empty strings
-        if fuel:
-            fuel = float(fuel)
-        else:
-            fuel = fuel_class  # Set a default value if fuel is empty
-
         if year:
             year = float(year)
         else:
@@ -194,10 +188,12 @@ def prediction_class(name,max_power,year,fuel):
     # Scale the input data using the trained scaler
     sample[:, 0: 2] = scaler_class.transform(sample[:, 0: 2])
     sample = np.insert(sample, 0, 1, axis=1)
+    # Turn the input data into polynomial
     sample_poly = poly.transform(sample)
     # Predict the car price using the trained model
     result = model_class.predict(sample_poly)
 
+    # Return the price range of the car based on the predicted class
     return k_range[result[0]]
 
 
