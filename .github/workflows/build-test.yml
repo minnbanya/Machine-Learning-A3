@@ -50,7 +50,7 @@ jobs:
         with:
           # Your image name
           images: minnbanya/ml2023-a3
-          tags: type=semver,pattern={{raw}}
+          tags: ${{ github.ref_name }}
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
