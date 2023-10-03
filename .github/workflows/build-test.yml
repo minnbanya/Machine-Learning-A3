@@ -63,23 +63,16 @@ jobs:
     needs: build-test
     runs-on: ubuntu-latest
     steps:
-      - name: Install sshpass and expect
-        run: |
-          sudo apt-get install sshpass -y
-          sudo apt-get install expect -y
-
       - name: SSH Remote Commands
-        run: |
-          # Use expect to input passphrase for proxy jump key
-          expect -c "
-            spawn sshpass -p '${{ secrets.CSIM_PASSWORD }}' ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
-            '${{ secrets.USERNAME }}'@'${{ vars.HOST }}' \
-            -o ProxyJump='${{ secrets.USERNAME }}'@'${{ vars.PROXY_HOST }}' -i '${{ secrets.PROXY_JUMP_KEY }}' \
-            'tag=\${{ github.ref_name }} docker compose -f st121413/docker-compose.yaml down; \
-            tag=\${{ github.ref_name }} docker compose -f st121413/docker-compose.yaml up -d'
-            expect {
-              \"*?assword:*\" { send \"\${{ secrets.SSH_PASSWORD }}\\r\"; }
-            }
-            interact
-          "
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ vars.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          proxy_host: ${{ vars.PROXY_HOST }}
+          proxy_username: ${{ secrets.USERNAME }}
+          proxy_key: ${{ secrets.KEY }}
+          script: |
+            tag=${{ github.ref_name }} docker compose -f st124145_a2/docker-compose.yaml down
+            tag=${{ github.ref_name }} docker compose -f st124145_a2/docker-compose.yaml up -d
   
