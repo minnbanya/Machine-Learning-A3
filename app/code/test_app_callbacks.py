@@ -1,24 +1,35 @@
 from contextvars import copy_context
-from dash._callback_context import context_value
-from dash._utils import AttributeDict
+import mlflow
 
 import pytest
-import main
-from pages import model1
+import model3
+import pickle
+import numpy as np
+import pandas as pd
 
 submit = 1
 def test_calculate_y_hardcode_1_plus_2_equal_3():
-    output = model1.calculate_y_hardcode(1,2, submit)
+    output = model3.calculate_y_hardcode(1,2, submit)
     assert output == 3
 
 def test_calculate_y_hardcode_2_plus_2_equal_4():
-    output = model1.calculate_y_hardcode(2,2, submit)
+    output = model3.calculate_y_hardcode(2,2, submit)
     assert output == 4
 
-def test_model_output_shape():
-    output = model1.calculate_model(1,2)
-    assert output.shape == (1,1), f"Expecting the shape to be (1,1) but got {output.shape=}"
+def test_model_input_shape():
+    filename = './models/Staging/values.pkl'
+    with open(filename, 'rb') as handle:
+        values = pickle.load(handle)
+    ohe = values['ohe']
+    poly = values['poly']
+    scaler = values['scaler']
+    encoded_brand = list(ohe.transform([['Maruti']]).toarray()[0])
+    sample = np.array([[47.3, 2017, 1] + encoded_brand])
+    sample[:, 0: 2] = scaler.transform(sample[:, 0: 2])
+    sample = np.insert(sample, 0, 1, axis=1)
+    sample_poly = poly.transform(sample)
+    assert sample_poly.shape == (1,8435), f"Expecting the shape to be (1,8435) but got {sample_poly.shape=}" 
 
-def test_model_coeff_shape():
-    output = model1.get_coeff()
-    assert output.shape == (1,2), f"Expecting the shape to be (1,2) but got {output.shape=}"
+def test_model_output_shape():
+    output = model3.calculate_model('Maruti',47.3,2017,1)
+    assert output.shape == (1,), f"Expecting the shape to be (1,) but got {output.shape=}"

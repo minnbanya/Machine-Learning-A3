@@ -1,7 +1,7 @@
 version: '1'
 services:
   app:
-    image: st124145:A2
+    image: minnbanya/st124145:A3
     ports:
       - "8000:8000"
     build: 
