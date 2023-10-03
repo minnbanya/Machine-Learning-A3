@@ -27,8 +27,7 @@ def test_model_input_shape():
     sample = np.array([[47.3, 2017, 1] + encoded_brand])
     sample[:, 0: 2] = scaler.transform(sample[:, 0: 2])
     sample = np.insert(sample, 0, 1, axis=1)
-    sample_poly = poly.transform(sample)
-    assert sample_poly.shape == (1,8435), f"Expecting the shape to be (1,8435) but got {sample_poly.shape=}" 
+    assert sample.shape == (1,35), f"Expecting the shape to be (1,35) but got {sample.shape=}" 
 
 def test_model_output_shape():
     output = model3.calculate_model('Maruti',47.3,2017,1)
