@@ -152,7 +152,7 @@ def prediction_new(name,engine,mileage):
 
 @app.route('/predict_class')
 def predict_class():
-    return render_template('predict_class.html')
+    return render_template('predict_class.html',brands = ohe.categories_[0])
 
 # The route to calculate the prediction result but not accessed by users
 @app.route('/process-data_class', methods = ['POST'])

@@ -16,14 +16,18 @@
                 <h1 class="text-center">Input Data (Classification)</h1>
                 <!-- User Instructions -->
                 <p>
-                    Please input the brand name, the engine power and mileage (fuel efficiency) of your car in the fields below to see the predicted selling price.
+                    Please input the brand name, the max power and year and fuel type of your car in the fields below to see the predicted selling price.
                     If you don't know one or more data of the fields, do not worry. Just leave it blank and the website will do the prediction using the most probable values.
                 </p>
                 <!-- User data input -->
                 <form id="data-form" action="/process-data_class" method="post">
                     <div class="form-group">
-                        <label for="name">Name:</label>
-                        <input type="text" id="name" name="name" class="form-control">
+                        <label for="name" class="form-label">Car Brand: (Choose one of the brand: otherwise, the first brand will be chosen.)</label>
+                        <select id="name" class="form-select" name="name">
+                        {% for brand in brands %}
+                            <option value="{{brand}}">{{brand}}</option>
+                        {% endfor %}
+                        </select>
                     </div>
                 
                     <div class="form-group">
